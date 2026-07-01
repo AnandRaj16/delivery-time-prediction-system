@@ -60,11 +60,12 @@ def load_model(model_path: Path):
     return model
 
 
-def save_model_info(save_json_path,run_id, artifact_path, model_name):
+def save_model_info(save_json_path,run_id, artifact_path, model_name, model_id):
     info_dict = {
         "run_id": run_id,
         "artifact_path": artifact_path,
-        "model_name": model_name
+        "model_name": model_name,
+        "model_id": model_id
     }
     with open(save_json_path,"w") as f:
         json.dump(info_dict,f,indent=4)
@@ -155,7 +156,7 @@ if __name__ == "__main__":
                                     model_output=model.predict(X_train.sample(20,random_state=42)))
         
         # log the final model
-        mlflow.sklearn.log_model(model,"delivery_time_pred_model",signature=model_signature,serialization_format="cloudpickle")
+        model_info = mlflow.sklearn.log_model(model,"delivery_time_pred_model",signature=model_signature,serialization_format="cloudpickle")
 
         # log stacking regressor
         mlflow.log_artifact(root_path / "models" / "stacking_regressor.joblib")
@@ -180,7 +181,8 @@ if __name__ == "__main__":
     save_model_info(save_json_path=save_json_path,
                     run_id=run_id,
                     artifact_path=artifact_uri,
-                    model_name=model_name)
+                    model_name=model_name,
+                    model_id=model_info.model_id)
     logger.info("Model Information saved")
     
     
