@@ -66,7 +66,7 @@ def data_cleaning(data: pd.DataFrame) -> pd.DataFrame:
     six_star_data = data.loc[data['ratings'] == "6"]
     six_star_index = six_star_data.index.tolist()
 
-    return (
+    cleaned_data = (
         data
         .drop(columns="id")
         .drop(index=minor_index)                                                # Minor riders in data dropped
@@ -121,13 +121,17 @@ def data_cleaning(data: pd.DataFrame) -> pd.DataFrame:
             festival = lambda x: x['festival'].str.rstrip().str.lower(),
             city_type = lambda x: x['city_type'].str.rstrip().str.lower(),
             # multiple deliveries column
-            multiple_deliveries = lambda x: x['multiple_deliveries'].astype(float),
-            # target column modifications
-            time_taken = lambda x: (x['time_taken']
-                                    .str.replace("(min) ","")
-                                    .astype(int)))
+            multiple_deliveries = lambda x: x['multiple_deliveries'].astype(float))
         .drop(columns=["order_time","order_picked_time"])
     )
+
+    # target column modifications (only present in training data, not at inference)
+    if "time_taken" in cleaned_data.columns:
+        cleaned_data["time_taken"] = (cleaned_data["time_taken"]
+                                      .str.replace("(min) ","")
+                                      .astype(int))
+
+    return cleaned_data
     
     
     
@@ -218,8 +222,8 @@ def drop_columns(data: pd.DataFrame, columns: list) -> pd.DataFrame:
  
     
     
-def perform_data_cleaning(data: pd.DataFrame, saved_data_path: Path) -> None:
-    
+def perform_data_cleaning(data: pd.DataFrame, saved_data_path: Path = None) -> pd.DataFrame:
+
     cleaned_data = (
         data
         .pipe(change_column_names)
@@ -229,9 +233,12 @@ def perform_data_cleaning(data: pd.DataFrame, saved_data_path: Path) -> None:
         .pipe(create_distance_type)
         .pipe(drop_columns,columns=columns_to_drop)
     )
-    
-    # save the data
-    cleaned_data.to_csv(saved_data_path,index=False)
+
+    # save the data only when a path is provided (batch pipeline use)
+    if saved_data_path is not None:
+        cleaned_data.to_csv(saved_data_path,index=False)
+
+    return cleaned_data
     
     
 
