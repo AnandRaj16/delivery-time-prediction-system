@@ -2,6 +2,10 @@ numpy
 pandas
 scikit-learn
 dagshub
+mlflow
 dvc
+dvc-s3
 lightgbm
 joblib
+pytest
+requests

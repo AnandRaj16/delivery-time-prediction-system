@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from sklearn.pipeline import Pipeline
+import os
 import uvicorn
 import pandas as pd
 import mlflow
@@ -83,8 +84,8 @@ client = MlflowClient()
 # load the model info to get the model name
 model_name = load_model_information("run_information.json")['model_name']
 
-# stage of the model
-stage = "Production"
+# stage of the model (override with MODEL_STAGE env var, e.g. "Staging" for local dev)
+stage = os.getenv("MODEL_STAGE", "Production")
 
 # get the latest model version
 # latest_model_ver = client.get_latest_versions(name=model_name,stages=[stage])
