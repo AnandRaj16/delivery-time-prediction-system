@@ -1,0 +1,16 @@
+version: 0.0
+os: linux
+
+files:
+  - source: /
+    destination: /home/ubuntu/delivery-time-prediction
+
+hooks:
+  AfterInstall:
+    - location: deploy/scripts/install_dependencies.sh
+      timeout: 300
+      runas: root
+  ApplicationStart:
+    - location: deploy/scripts/start_docker.sh
+      timeout: 300
+      runas: root
