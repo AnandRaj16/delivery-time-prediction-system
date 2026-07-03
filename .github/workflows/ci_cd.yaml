@@ -75,7 +75,12 @@ jobs:
       - name: Upload ZIP to S3 bucket
         if: success()
         run: |
-          aws s3 cp deployment.zip s3://deliverytimepredictiondeploy-104531737272/deployment.zip --region eu-north-1
+          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+          BUCKET="deliverytimepredictiondeploy-${ACCOUNT_ID}"
+          echo "Using deployment bucket: ${BUCKET}"
+          aws s3 mb "s3://${BUCKET}" --region eu-north-1 || true
+          aws s3 cp deployment.zip "s3://${BUCKET}/deployment.zip" --region eu-north-1
+          echo "DEPLOY_BUCKET=${BUCKET}" >> "$GITHUB_ENV"
 
       - name: Deploy to AWS CodeDeploy
         if: success()
@@ -84,7 +89,7 @@ jobs:
             --application-name deliverytimeprediction \
             --deployment-config-name CodeDeployDefault.OneAtATime \
             --deployment-group-name deliverytimepredictiondeploymentgroup \
-            --s3-location bucket=deliverytimepredictiondeploy-104531737272,key=deployment.zip,bundleType=zip \
+            --s3-location bucket=${DEPLOY_BUCKET},key=deployment.zip,bundleType=zip \
             --file-exists-behavior OVERWRITE \
             --region eu-north-1
 
