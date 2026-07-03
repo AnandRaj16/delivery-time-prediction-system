@@ -76,7 +76,7 @@ if __name__ == "__main__":
     client.transition_model_version_stage(
         name=registered_model_name,
         version=registered_model_version,
-        stage="Production"
+        stage="Staging"
     )
     
     logger.info("Model pushed to Staging stage")
