@@ -87,9 +87,35 @@ jobs:
           aws s3 cp deployment.zip "s3://${BUCKET}/deployment.zip" --region eu-north-1
           echo "DEPLOY_BUCKET=${BUCKET}" >> "$GITHUB_ENV"
 
+      - name: Ensure CodeDeploy application exists
+        if: success()
+        run: |
+          if aws deploy get-application \
+            --application-name deliverytimeprediction \
+            --region eu-north-1 >/dev/null 2>&1; then
+            echo "CodeDeploy application already exists."
+          else
+            echo "Creating CodeDeploy application..."
+            aws deploy create-application \
+              --application-name deliverytimeprediction \
+              --compute-platform Server \
+              --region eu-north-1
+          fi
+
       - name: Deploy to AWS CodeDeploy
         if: success()
         run: |
+          if ! aws deploy get-deployment-group \
+            --application-name deliverytimeprediction \
+            --deployment-group-name deliverytimepredictiondeploymentgroup \
+            --region eu-north-1 >/dev/null 2>&1; then
+            echo "::error::CodeDeploy deployment group 'deliverytimepredictiondeploymentgroup' does not exist."
+            echo "Create it once in AWS Console (eu-north-1):"
+            echo "  CodeDeploy -> deliverytimeprediction -> Create deployment group"
+            echo "  Tag filter: Project = delivery-time-prediction"
+            echo "See deploy/setup_codedeploy.sh for full setup steps."
+            exit 1
+          fi
           aws deploy create-deployment \
             --application-name deliverytimeprediction \
             --deployment-config-name CodeDeployDefault.OneAtATime \
