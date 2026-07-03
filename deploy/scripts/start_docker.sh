@@ -2,9 +2,9 @@
 set -e
 
 # ---- Configure these for your AWS account ----
-AWS_REGION="ap-south-1"
-ECR_REGISTRY="<ACCOUNT_ID>.dkr.ecr.ap-south-1.amazonaws.com"   # TODO: set your ECR registry host
-ECR_REPOSITORY="<REPO_NAME>"                                    # TODO: set your ECR repository name
+AWS_REGION="eu-north-1"
+ECR_REGISTRY="104531737272.dkr.ecr.eu-north-1.amazonaws.com"
+ECR_REPOSITORY="delivery_time_prediction_system"
 IMAGE_TAG="latest"
 CONTAINER_NAME="delivery-time-prediction"
 HOST_PORT="80"
